@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.apk
+*.idsig
+*.jks
+captures/
+.DS_Store
