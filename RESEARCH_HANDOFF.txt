@@ -1,0 +1,67 @@
+================================================================================
+SAFARICOM M-PESA ("MY ONEAPP") RESEARCH HANDOFF & PEER AGENT DOSSIER
+================================================================================
+Target:      com.safaricom.mpesa.lifestyle (v5.3.1 / VersionCode: 50039)
+Working Dir: C:\Users\Administrator\Documents\mpesa
+Repo Path:   C:\Users\Administrator\Documents\mpesa\mpesa-webview-bridge-hijack-poc
+OpenCode:    opencode -s ses_e67267c89ffe3Bd0hsRbYqZ9w6
+Device:      Xiaomi 24117RN76G (Serial: bqdukr8xg6tklnss / Android 14)
+Date:        November 2026
+
+--------------------------------------------------------------------------------
+1. THE DEFINITIVE VULNERABILITY MECHANISM (VERIFIED & CONFIRMED)
+--------------------------------------------------------------------------------
+Vulnerability: Exported Activity URL Proxying & In-App WebView Bridge Hijacking
+Primary Vector: NFCEmptyActivity (safaricomnfcpay://)
+Gating Check:   host.contains("safaricom.co.ke") || host.contains("masoko.com")
+Native Bridge:  window.consumerapp (JsInteraction.evaluate) -> 25 privileged methods
+                (js_fun_verify_pin, js_fun_h5_sign, js_fun_getFileByApp, etc.)
+Permission:     ApiPermissionHelper fails open (missing assets/h5PermissionConfig.json)
+
+--------------------------------------------------------------------------------
+2. CRITICAL SCOPE BOUNDARY: ACTIVE SESSION VS COLD START
+--------------------------------------------------------------------------------
+A. ACTIVE SESSION (100% WORKING & LIVE-DEVICE VERIFIED):
+   - Condition: User has unlocked M-PESA and the session is within its standard
+     5-minute timeout window (app in foreground, background, or recent tasks).
+   - Command:
+     adb shell am start -W \
+       -n com.safaricom.mpesa.lifestyle/com.huawei.digitalpayment.consumer.nfc.ui.activity.NFCEmptyActivity \
+       --es saveUri "safaricomnfcpay://openapp?route=https%3A%2F%2Fwww.safaricom.co.ke"
+   - Device Behavior:
+     Transition: WARM -> WebViewActivity in 900-1115 ms.
+     Toolbar Title Rendered: "Safaricom : Premier Mobile, Data, & M-PESA Services"
+     Chromium Engine: Fully renders external DOM and binds window.consumerapp.
+
+B. COLD START / TERMINATED APP (DROPS / INERT):
+   - Why NFCEmptyActivity fails on cold start:
+     In NFCEmptyActivity.smali (lines 4286-4300), ILoginService.isLogin() is false.
+     App routes to /loginModule/sfcSplash and terminates (finish()) without
+     saving the route to persistent storage.
+   - Why SfcAdjustEmptyActivity (fintechoneapp://) gives an empty white screen:
+     AdjustUtils.saveLink() DOES write to SAVED_LINK in SharedPreferences.
+     Upon PIN login, NewHomeActivity.navigateToSavedLink() reads it.
+     HOWEVER, AdjustUtils.parseLink() strips the scheme and extracts "host + path"
+     ("webViewModule/webview"). Because it lacks "://", ARouter prepends
+     "native://app/", setting scheme_execute_key = "native://app/webViewModule/webview".
+     Chromium cannot resolve internal "native://" URIs, rendering a blank white container.
+   - Triage Rule: Do NOT claim that closed apps resume external web links.
+     Scope the report strictly to active session interaction (CVSS v3.1: PR:N, UI:R).
+
+--------------------------------------------------------------------------------
+3. DELIVERABLE ARTIFACTS IN REPOSITORY
+--------------------------------------------------------------------------------
+Directory: C:\Users\Administrator\Documents\mpesa\mpesa-webview-bridge-hijack-poc
+- README.md: Complete CVSS 9.3 vulnerability report with smali line references.
+- poc.html: Web test harness demonstrating window.consumerapp method calls.
+- trigger_poc.py: Python script automating ADB intent dispatch.
+- verify_domain_bypass.py: Offline script proving .contains() substring bypass.
+- .gitignore: Excludes APKs, keys, and temporary files.
+Local Git commit: Initialized and committed cleanly on branch master.
+
+--------------------------------------------------------------------------------
+4. MASTER DOCUMENTATION TRACKING
+--------------------------------------------------------------------------------
+- Persistent System Memory: C:\Users\Administrator\GEMINI.md (Target 10 updated)
+- Desktop Dossier: C:\Users\Administrator\Desktop\MPESA_DEEPLINK_TOKEN_EXFIL_TRACE.txt (Section 6 added)
+================================================================================
