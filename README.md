@@ -198,7 +198,17 @@ Because `Uri.parse("https://safaricom.co.ke.attacker.com").getHost()` contains `
 
 ## 4. Live Device Verification Evidence
 
-The exploit was verified on a physical Android test device connected via USB.
+The vulnerability was verified on a physical Android test device connected via USB.
+
+### Companion Verification APK (`MpesaNfcPoC.apk`)
+A standalone zero-permission companion Android application is bundled in this repository to demonstrate the one-click trigger:
+- **Binary Path in Repo:** [`MpesaNfcPoC.apk`](./MpesaNfcPoC.apk)
+- **Direct Download Link:** [Download MpesaNfcPoC.apk](https://raw.githubusercontent.com/singknowcollab/mpesa-webview-bridge-poc/master/MpesaNfcPoC.apk)
+- **Usage:**
+  1. Open `MpesaNfcPoC.apk` on a device with an active M-PESA session.
+  2. The input field defaults to the target validation URL (or enter `https://safaricom.co.ke.185.199.108.153.sslip.io`).
+  3. Tap **"3) Trigger URL from field above"** to launch M-PESA directly into the external webpage.
+  4. Alternatively, tap **"2) Trigger renderable URL (www.safaricom.co.ke)"** for baseline verification.
 
 ### Test Rig Specifications
 - **Device Model:** Xiaomi 24117RN76G (`bqdukr8xg6tklnss`)
