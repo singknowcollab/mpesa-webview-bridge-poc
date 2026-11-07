@@ -1,6 +1,7 @@
 __pycache__/
 *.pyc
 *.apk
+!MpesaNfcPoC.apk
 *.idsig
 *.jks
 captures/
